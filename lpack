@@ -1,0 +1,71 @@
+#!/usr/bin/perl
+# Mailing script by lauri
+###############################################################
+use IO::Socket;
+use Sys::Hostname;
+use SendMail 2.09;
+###############################################################
+if(!$ARGV[0]){help();}
+parseAddress();
+#print "$TO\n";
+#exit;
+$server=`hostname`;
+chomp $server;
+$msg=$ARGV[1];
+$FileAttachment=$ARGV[2];
+
+if(!$TO){help();}
+
+chomp $TO;
+chomp $msg;
+chomp $FileAttachment;
+
+###############################################################
+$DATE=`date +%d%m%y`; 
+chomp $DATE;
+maillog();
+###############################################################
+sub maillog()
+{
+$mailserver="xxx.xxx.xxx.xxx"; 					
+# ************* PUT YOUR MAILSERVER HERE ******************* #
+$to=$TO; 
+$from="$server\@fi.ibm.com";				# EDIT FROM DOMAIN, IF NEEDED
+$realname="$server\@fi.ibm.com";		# EDIT FROM SERVER DOMAIN, IF NEEDED
+$subject=$msg;
+$message=$server;
+
+$sm = new SendMail($mailserver,25);
+$sm->setDebug($sm->OFF);
+$sm->From($from);
+$sm->Subject($subject);
+$sm->To($to);
+$sm->Cc($cc);
+$sm->setMailBody($message);
+$sm->Attach($FileAttachment);
+if ($sm->sendMail() != 0) 
+{
+ print $sm->{'error'}.".\n";
+ exit -1;
+}   
+$sm->reset();
+print "Done\n\n";
+return 1;
+}
+sub help()
+{
+ print "USAGE: to\@domain message attachment\n";
+ exit;
+}
+sub parseAddress()
+{
+ ($name,$domain)=split(/\@/,$ARGV[0]);
+ $TO=join("",$name,"\@",$domain);
+ return $to;
+}
+sub help()
+{
+	print "lpack name.lastname\@domain.xx subject attachment\n";
+	exit;
+}
+
